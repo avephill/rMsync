@@ -16,6 +16,7 @@ Adjust the paths at the top of the script!
 * pdftk
 * https://github.com/lschwetlick/maxio/tree/master/rm_tools
 * ( https://github.com/reHackable/scripts )
+* [reMarkable Entware](https://github.com/Evidlo/remarkable_entware)
 
 ### Usage
 ```

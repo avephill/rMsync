@@ -3,6 +3,9 @@ Commandline Utility to Backup, Convert and Upload files from the remarkable
 """
 #!/usr/bin/env python3
 
+# Don't have this working for .epub yet
+# Also figure out how to get it to push to particular folders
+
 ### IMPORTS ###
 import os
 import sys
@@ -20,23 +23,23 @@ __prog_name__ = "sync"
 
 # Set Parameters and folders for sync
 # this folder has all the pdfs that need to be synced
-syncDirectory = "/Users/lisa/Documents/Literature"
+syncDirectory = "/Users/averyhill/Desktop/Remark/Literature"
 # The folder where notes will be exported to (it is excluded from the uploading)
 notesDirectory = "Notes"
 # Basic set up
-remarkableBackupDirectory = "/Users/lisa/Documents/remarkableBackup"
+remarkableBackupDirectory = "/Users/averyhill/Desktop/Remark/backup"
 remContent = "xochitl"
 remarkableDirectory = "/home/root/.local/share/remarkable/xochitl"
 remarkableUsername = "root"
-remarkableIP = "10.11.99.1" #"192.168.0.87"# "10.11.99.1"
+remarkableIP = "10.11.99.1" #"192.168.0.127" # #"192.168.0.87"# "10.11.99.1"
 
 # This is a script that supposedly uploads multiple files at a time
-pushScript = "/Users/lisa/Documents/Projects/rMTools/scripts/host/repush.sh"
+pushScript = "/Users/averyhill/Desktop/Remark/scripts-master/host/repush.sh"
 # This folder contains all the notbook backgrounds the remarkable has
 # (and that I have added). Lives at "/usr/share/remarkable/templates/" on the RM
-bgPath = "/Users/lisa/Documents/remarkableBackup/templates/"
+bgPath = "/Users/averyhill/Desktop/Remark/backup/templates/"
 # This is an empty rm file
-emptyRm = "/Users/lisa/Documents/remarkableBackup/empty.rm"
+emptyRm = "/Users/averyhill/Desktop/Remark/backup/empty.rm"
 
 def main():
     """
@@ -99,11 +102,17 @@ def backupRM(purge=False):
     """
     print("Backing up your remarkable files")
     if purge:
-        shutil.rmtree("/Users/lisa/Documents/remarkableBackup" + remContent)
+        shutil.rmtree("/Users/averyhill/Desktop/Remark/backup" + remContent)
         print("deleted old files")
-    backupCommand = "".join(["scp -r ", remarkableUsername, "@", remarkableIP,
-                             ":", remarkableDirectory, " ",
-                             remarkableBackupDirectory])
+    # backupCommand = "".join(["scp -r ", remarkableUsername, "@", remarkableIP,
+    #                          ":", remarkableDirectory, " ",
+    #                          remarkableBackupDirectory])
+    
+    # install rsync with entware and point to the rsync path
+    backupCommand = "".join(["rsync -a --rsync-path=/home/root/.entware/bin/rsync --progress ", 
+        remarkableUsername, "@", remarkableIP,
+        ":", remarkableDirectory, "/ ",
+        remarkableBackupDirectory,"/"])
     #print(backupCommand)
     os.system(backupCommand)
 
@@ -188,7 +197,7 @@ def convertFiles():
                     convertNotebook(fname, refNrPath)
                     #####
                 else:
-                    print(fname + "has not changed")
+                    print(fname + " has not changed")
 
 
 ### UPLOAD ###
@@ -304,6 +313,7 @@ def uploadToRM_curl(dry):
         # #chronos@localhost ~/Downloads $ curl 'http://10.11.99.1/upload' -H 'Origin: http://10.11.99.1' -H 'Accept: */*' -H 'Referer: http://10.11.99.1/' -H 'Connection: keep-alive' -F "file=@Get_started_with_reMarkable.pdf;filename=Get_started_with_reMarkable.pdf;type=application/pdf"
         #uploadCmd = "".join(["curl 'http://10.11.99.1/upload' -H 'Origin: http://10.11.99.1' -H 'Accept: */*' -H 'Referer: http://10.11.99.1/' -H 'Connection: keep-alive' -F 'file=@", filePath, ";filename=", fileName, ";type=application/pdf'"])
         uploadCmd = "".join(["curl 'http://",remarkableIP,"/upload' -H 'Origin: http://",remarkableIP,"' -H 'Accept: */*' -H 'Referer: http://",remarkableIP,"' -H 'Connection: keep-alive' -F 'file=@", filePath, ";filename=", fileName, ";type=application/pdf'"])
+        # This fails at a certain unknown filesize
 
         if dry:
             print("uploadCmd: ")
